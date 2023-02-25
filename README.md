@@ -1,3 +1,6 @@
+[![Testing Python Package](https://github.com/momijiame/shirokumas/actions/workflows/python-testing.yml/badge.svg)](https://github.com/momijiame/shirokumas/actions/workflows/python-testing.yml)
+[![Upload Python Package](https://github.com/momijiame/shirokumas/actions/workflows/python-publish.yml/badge.svg)](https://github.com/momijiame/shirokumas/actions/workflows/python-publish.yml)
+
 # Shirokumas
 
 A set of scikit-learn style transformers for Polars.
@@ -9,7 +12,7 @@ The transformers have the following property:
 ## How to install
 
 ```sh
-$ pip install git+https://github.com/momijiame/shirokumas.git
+$ pip install shirokumas
 ```
 
 ## How to use
