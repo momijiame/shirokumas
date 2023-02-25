@@ -1,0 +1,7 @@
+<install-via-pypi>
+$ pip install shirokuma
+</install-via-pypi>
+
+<install-from-source>
+$ pip install git+https://github.com/momijiame/shirokuma.git
+</install-from-source>

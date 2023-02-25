@@ -1,0 +1,16 @@
+<basic-usage>
+import shirokuma
+
+encoder = shirokuma.AggregateEncoder(...)
+encoder = shirokuma.CountEncoder(...)
+encoder = shirokuma.NullEncoder(...)
+encoder = shirokuma.OneHotEncoder(...)
+encoder = shirokuma.OrdinalEncoder(...)
+encoder = shirokuma.TargetEncoder(...)
+
+train_x, train_y, test_x = ...
+
+encoder.fit(train_x, train_y)
+encoded_train_x = encoder.transform(train_x, train_y)
+encoded_test_x = encoder.transform(test_x)
+</basic-usage>

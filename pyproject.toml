@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/momijiame/shirokumas"
+
+[project]
+name = "shirokumas"
+description = "A set of scikit-learn style transformers for Polars"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "polars>=0.16.5",
+    "scikit-learn",
+    "scipy",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "flake8",
+    "mypy",
+    "black",
+    "isort",
+    "pylint",
+    "build",
+    "twine",
+    "sphinx-rtd-theme",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "shirokumas.__version__"}
+
+[tools.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+
+[tool.mypy]
+no_strict_optional = true
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pylint]
+disable = "C,R"
