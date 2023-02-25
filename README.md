@@ -15,14 +15,14 @@ $ pip install git+https://github.com/momijiame/shirokumas.git
 ## How to use
 
 ```python
-import shirokumas
+import shirokumas as sk
 
-encoder = shirokumas.AggregateEncoder(...)
-encoder = shirokumas.CountEncoder(...)
-encoder = shirokumas.NullEncoder(...)
-encoder = shirokumas.OneHotEncoder(...)
-encoder = shirokumas.OrdinalEncoder(...)
-encoder = shirokumas.TargetEncoder(...)
+encoder = sk.AggregateEncoder(...)
+encoder = sk.CountEncoder(...)
+encoder = sk.NullEncoder(...)
+encoder = sk.OneHotEncoder(...)
+encoder = sk.OrdinalEncoder(...)
+encoder = sk.TargetEncoder(...)
 
 train_x, train_y, test_x = ...
 
