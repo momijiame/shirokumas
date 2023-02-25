@@ -1,5 +1,6 @@
 [![Testing Python Package](https://github.com/momijiame/shirokumas/actions/workflows/python-testing.yml/badge.svg)](https://github.com/momijiame/shirokumas/actions/workflows/python-testing.yml)
 [![Upload Python Package](https://github.com/momijiame/shirokumas/actions/workflows/python-publish.yml/badge.svg)](https://github.com/momijiame/shirokumas/actions/workflows/python-publish.yml)
+![Python Versions](https://img.shields.io/pypi/pyversions/shirokumas.svg?logo=python&logoColor=white)
 
 # Shirokumas
 
