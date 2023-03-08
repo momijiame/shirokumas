@@ -1,16 +1,16 @@
 <basic-usage>
-import shirokuma
+import shirokumas as sk
 
-encoder = shirokuma.AggregateEncoder(...)
-encoder = shirokuma.CountEncoder(...)
-encoder = shirokuma.NullEncoder(...)
-encoder = shirokuma.OneHotEncoder(...)
-encoder = shirokuma.OrdinalEncoder(...)
-encoder = shirokuma.TargetEncoder(...)
+encoder = sk.AggregateEncoder(...)
+encoder = sk.CountEncoder(...)
+encoder = sk.NullEncoder(...)
+encoder = sk.OneHotEncoder(...)
+encoder = sk.OrdinalEncoder(...)
+encoder = sk.TargetEncoder(...)
 
 train_x, train_y, test_x = ...
 
 encoder.fit(train_x, train_y)
-encoded_train_x = encoder.transform(train_x, train_y)
+encoded_train_x = encoder.transform(train_x)
 encoded_test_x = encoder.transform(test_x)
 </basic-usage>
