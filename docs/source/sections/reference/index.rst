@@ -2,6 +2,6 @@
 API Reference
 ################################################################################
 
-.. automodule:: shirokuma
+.. automodule:: shirokumas
    :members:
    :undoc-members:

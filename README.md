@@ -31,6 +31,6 @@ encoder = sk.TargetEncoder(...)
 train_x, train_y, test_x = ...
 
 encoder.fit(train_x, train_y)
-encoded_train_x = encoder.transform(train_x, train_y)
+encoded_train_x = encoder.transform(train_x)
 encoded_test_x = encoder.transform(test_x)
 ```

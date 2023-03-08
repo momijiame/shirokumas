@@ -38,6 +38,7 @@ dev = [
     "build",
     "twine",
     "sphinx-rtd-theme",
+    "sphinx-autobuild",
 ]
 
 [tool.setuptools.dynamic]

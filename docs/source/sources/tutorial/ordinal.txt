@@ -1,0 +1,92 @@
+<prepare-dataframe>
+>>> import polars as pl
+>>> train_df = pl.DataFrame({"fruits": ["apple", "banana", "cherry"]})
+</prepare-dataframe>
+
+<instantiate-encoder>
+>>> encoder = sk.OrdinalEncoder()
+</instantiate-encoder>
+
+<fit-transform>
+>>> encoder.fit_transform(train_df)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ i64    │
+╞════════╡
+│ 1      │
+│ 2      │
+│ 3      │
+└────────┘
+</fit-transform>
+
+<transform-test>
+>>> test_df = pl.DataFrame({"fruits": ["cherry", "banana", "apple"]})
+>>> encoder.transform(test_df)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ i64    │
+╞════════╡
+│ 3      │
+│ 2      │
+│ 1      │
+└────────┘
+</transform-test>
+
+<mappings-option>
+>>> encoder = sk.OrdinalEncoder(mappings={
+...     "fruits": {
+...         "apple": 10,
+...         "banana": 20,
+...         "cherry": 30,
+...     }
+... })
+>>> encoder.fit_transform(train_df)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ i64    │
+╞════════╡
+│ 10     │
+│ 20     │
+│ 30     │
+└────────┘
+</mappings-option>
+
+<none-and-unknown>
+>>> test_df = pl.DataFrame({"fruits": ["unseen", None, "apple"]})
+>>> encoder.transform(test_df)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ i64    │
+╞════════╡
+│ -1     │
+│ -2     │
+│ 10     │
+└────────┘
+</none-and-unknown>
+
+<cols>
+>>> train_df = pl.DataFrame({
+...     "fruits": ["apple", "banana", "cherry"],
+...     "vegetables": ["avocados", "broccoli", "carrots"],
+... })
+>>> encoder = sk.OrdinalEncoder(cols=["vegetables"])
+>>> encoder.fit_transform(train_df)
+shape: (3, 1)
+┌────────────┐
+│ vegetables │
+│ ---        │
+│ i64        │
+╞════════════╡
+│ 1          │
+│ 2          │
+│ 3          │
+└────────────┘
+</cols>
