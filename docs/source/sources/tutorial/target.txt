@@ -1,0 +1,98 @@
+<prepare-dataframe>
+>>> train_x = pl.DataFrame(
+...     {
+...         "fruits": ["apple", "banana", "banana", "apple"],
+...     }
+... )
+>>> train_y = pl.Series(
+...     name="target",
+...     values=[1, 0, 1, 1],
+... )
+</prepare-dataframe>
+
+<prepare-folds>
+>>> from sklearn.model_selection import KFold
+>>> folds = KFold(n_splits=4, shuffle=False)
+</prepare-folds>
+
+<fit-and-transform>
+>>> encoder = sk.TargetEncoder(folds=folds)
+>>> encoder.fit(train_x, train_y)
+TargetEncoder(folds=KFold(n_splits=4, random_state=None, shuffle=False))
+>>> encoder.transform(train_x)
+shape: (4, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ f64    │
+╞════════╡
+│ 1.0    │
+│ 1.0    │
+│ 0.0    │
+│ 1.0    │
+└────────┘
+</fit-and-transform>
+
+<transform-test-data>
+test_x = pl.DataFrame(
+    {
+        "fruits": ["apple", "banana", "cherry"],
+    }
+)
+>>> encoder.transform(test_x)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ f64    │
+╞════════╡
+│ 1.0    │
+│ 0.5    │
+│ 0.75   │
+└────────┘
+</transform-test-data>
+
+<m-estimate>
+encoder = sk.TargetEncoder(
+    folds=folds,
+    smoothing_method="m-estimate",
+    smoothing_params={
+        "m": 1.0,
+    },
+)
+>>> encoder.fit_transform(train_x, train_y)
+shape: (4, 1)
+┌──────────┐
+│ fruits   │
+│ ---      │
+│ f64      │
+╞══════════╡
+│ 0.833333 │
+│ 1.0      │
+│ 0.333333 │
+│ 0.833333 │
+└──────────┘
+</m-estimate>
+
+<empirical-bayesian>
+>>> encoder = sk.TargetEncoder(
+...     folds=folds,
+...     smoothing_method="eb",
+...     smoothing_params={
+...         "k": 1,
+...         "f": 1,
+...     },
+... )
+>>> encoder.fit_transform(train_x, train_y)
+shape: (4, 1)
+┌──────────┐
+│ fruits   │
+│ ---      │
+│ f64      │
+╞══════════╡
+│ 0.833333 │
+│ 1.0      │
+│ 0.333333 │
+│ 0.833333 │
+└──────────┘
+</empirical-bayesian>

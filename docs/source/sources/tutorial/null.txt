@@ -1,0 +1,15 @@
+<prepare-dataframe-and-fit-transform>
+>>> train_df = pl.DataFrame({"fruits": ["apple", None, "cherry"]})
+>>> encoder = sk.NullEncoder()
+>>> encoder.fit_transform(train_df)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ bool   │
+╞════════╡
+│ false  │
+│ true   │
+│ false  │
+└────────┘
+</prepare-dataframe-and-fit-transform>
