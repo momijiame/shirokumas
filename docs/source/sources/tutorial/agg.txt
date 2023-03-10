@@ -1,0 +1,36 @@
+<prepare-dataframe>
+>>> train_df = pl.DataFrame(
+...     {
+...         "fruits": ["apple", "apple", "banana", "banana", "cherry"],
+...         "price": [100, 200, 300, 400, 500],
+...     }
+... )
+</prepare-dataframe>
+
+<instantiate-encoder>
+>>> encoder = sk.AggregateEncoder(
+...     cols=[
+...         "fruits",
+...     ],
+...     agg_exprs={
+...         "mean": pl.col("price").mean(),
+...         "max": pl.col("price").max(),
+...     },
+... )
+</instantiate-encoder>
+
+<fit-transform>
+>>> encoder.fit_transform(train_df)
+shape: (5, 2)
+┌─────────────┬────────────┐
+│ fruits_mean ┆ fruits_max │
+│ ---         ┆ ---        │
+│ f64         ┆ i64        │
+╞═════════════╪════════════╡
+│ 150.0       ┆ 200        │
+│ 150.0       ┆ 200        │
+│ 350.0       ┆ 400        │
+│ 350.0       ┆ 400        │
+│ 500.0       ┆ 500        │
+└─────────────┴────────────┘
+</fit-transform>

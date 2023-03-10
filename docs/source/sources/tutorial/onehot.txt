@@ -1,0 +1,15 @@
+<prepare-dataframe-and-fit-transform>
+>>> train_df = pl.DataFrame({"fruits": ["apple", "banana", "cherry"]})
+>>> encoder = sk.OneHotEncoder()
+>>> encoder.fit_transform(train_df)
+shape: (3, 3)
+┌──────────────┬───────────────┬───────────────┐
+│ fruits_apple ┆ fruits_banana ┆ fruits_cherry │
+│ ---          ┆ ---           ┆ ---           │
+│ bool         ┆ bool          ┆ bool          │
+╞══════════════╪═══════════════╪═══════════════╡
+│ true         ┆ false         ┆ false         │
+│ false        ┆ true          ┆ false         │
+│ false        ┆ false         ┆ true          │
+└──────────────┴───────────────┴───────────────┘
+</prepare-dataframe-and-fit-transform>
