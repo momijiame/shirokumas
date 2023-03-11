@@ -2,6 +2,14 @@
 API Reference
 ################################################################################
 
-.. automodule:: shirokumas
-   :members:
-   :undoc-members:
+.. autoclass:: shirokumas.AggregateEncoder
+
+.. autoclass:: shirokumas.CountEncoder
+
+.. autoclass:: shirokumas.NullEncoder
+
+.. autoclass:: shirokumas.OneHotEncoder
+
+.. autoclass:: shirokumas.OrdinalEncoder
+
+.. autoclass:: shirokumas.TargetEncoder
