@@ -24,6 +24,13 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
         self._fitted: bool = False
 
     def fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
+        """Train the features.
+
+        :param X:
+            explanatory feature.
+        :param y:
+            objective feature.
+        """
         self.cols = self.cols or X.columns
 
         if self.handle_missing == "error":
@@ -43,6 +50,11 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
         raise NotImplementedError()
 
     def transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
+        """Transform the features.
+
+        :param X:
+            explanatory feature.
+        """
         if not self._fitted:
             raise NotFittedException("This encoder instance is not fitted yet")
 
