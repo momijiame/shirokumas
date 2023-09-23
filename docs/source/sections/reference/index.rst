@@ -10,6 +10,8 @@ API Reference
 
 .. autoclass:: shirokumas.OneHotEncoder
 
+.. autoclass:: shirokumas.MultiLabelBinarizer
+
 .. autoclass:: shirokumas.OrdinalEncoder
 
 .. autoclass:: shirokumas.TargetEncoder

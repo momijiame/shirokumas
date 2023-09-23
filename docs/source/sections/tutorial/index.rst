@@ -12,7 +12,7 @@ The basic usage is shown below.
 The following sections explain how to use each encoder.
 
 .. include:: ordinal.rst
-.. include:: onehot.rst
+.. include:: binarize.rst
 .. include:: count.rst
 .. include:: null.rst
 .. include:: target.rst

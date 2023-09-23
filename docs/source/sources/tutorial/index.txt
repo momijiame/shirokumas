@@ -5,6 +5,7 @@ encoder = sk.AggregateEncoder(...)
 encoder = sk.CountEncoder(...)
 encoder = sk.NullEncoder(...)
 encoder = sk.OneHotEncoder(...)
+encoder = sk.MultiLabelBinarizer(...)
 encoder = sk.OrdinalEncoder(...)
 encoder = sk.TargetEncoder(...)
 
