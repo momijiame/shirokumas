@@ -63,7 +63,7 @@ class AggregateEncoder(BaseEncoder):
             X_lazy = X_lazy.with_columns(
                 [
                     pl.col(col)
-                    .map_dict(remapping=remapping, default=unknown_value)
+                    .replace(remapping, default=unknown_value)
                     .alias(agg_name)
                     for agg_name, remapping in col_remappings.items()
                 ]
