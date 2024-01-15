@@ -47,8 +47,8 @@ class CountEncoder(BaseEncoder):
         for col, mapping in self.mappings.items():
             remapping = {category: count for category, count in mapping.rows()}
             remapping[None] = missing_value
-            expr = pl.col(col).map_dict(
-                remapping=remapping,
+            expr = pl.col(col).replace(
+                remapping,
                 default=unknown_value,
             )
             X_lazy = X_lazy.with_columns(expr.alias(col))
