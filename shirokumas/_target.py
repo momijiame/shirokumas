@@ -183,11 +183,15 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
                 .agg(
                     [
                         pl.col(y.name).mean().alias(f"{col}_mean"),
-                        expit(
+                        (
                             (pl.col(col).count().cast(pl.Float64) - self.k) / self.f
-                        ).alias(f"{col}_lambda"),
+                        ).alias(f"{col}_exp"),
                     ]
                 )
+                .with_columns(
+                    expit(pl.col(f"{col}_exp")).alias(f"{col}_lambda"),
+                )
+                .drop(f"{col}_exp")
                 .collect()
             )
             self.mappings[col] = local_df
