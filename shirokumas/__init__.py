@@ -7,7 +7,7 @@ from ._oof import OutOfFoldEncodeWrapper  # noqa: F401
 from ._ordinal import OrdinalEncoder  # noqa: F401
 from ._target import TargetEncoder  # noqa: F401
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __all__ = [
     "AggregateEncoder",
     "CountEncoder",
