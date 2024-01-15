@@ -90,7 +90,7 @@ class _NoneSmoothingStrategy(BaseEstimator, TransformerMixin):
 
         for col in X.columns:
             local_df = (
-                X_lazy.groupby(col)
+                X_lazy.group_by(col)
                 .agg(
                     [
                         pl.col(y.name).mean().alias(f"{col}_mean"),
@@ -133,7 +133,7 @@ class _MEstimateStrategy(BaseEstimator, TransformerMixin):
 
         for col in X.columns:
             local_df = (
-                X_lazy.groupby(col)
+                X_lazy.group_by(col)
                 .agg(
                     [
                         pl.col(y.name).count().alias(f"{col}_count"),
@@ -179,7 +179,7 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
 
         for col in X.columns:
             local_df = (
-                X_lazy.groupby(col)
+                X_lazy.group_by(col)
                 .agg(
                     [
                         pl.col(y.name).mean().alias(f"{col}_mean"),
