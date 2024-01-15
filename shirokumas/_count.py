@@ -36,7 +36,7 @@ class CountEncoder(BaseEncoder):
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
         cols = self.cols or X.columns
         for col in cols:
-            self.mappings[col] = X.groupby(col).count()
+            self.mappings[col] = X.group_by(col).count()
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         unknown_value = -1

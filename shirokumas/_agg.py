@@ -41,7 +41,7 @@ class AggregateEncoder(BaseEncoder):
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
         for col in self.cols:
-            self.mappings[col] = X.groupby(
+            self.mappings[col] = X.group_by(
                 by=col,
             ).agg(
                 [expr.alias(f"{col}_{name}") for name, expr in self.agg_exprs.items()]
