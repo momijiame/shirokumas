@@ -109,8 +109,8 @@ class _NoneSmoothingStrategy(BaseEstimator, TransformerMixin):
                 for category, local_mean in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
-            expr = pl.col(col).map_dict(
-                remapping=remapping,
+            expr = pl.col(col).replace(
+                remapping,
                 default=_UNKNOWN_VALUE,
             )
             X_lazy = X_lazy.with_columns(expr.alias(col))
@@ -155,8 +155,8 @@ class _MEstimateStrategy(BaseEstimator, TransformerMixin):
                 for category, local_count, local_sum in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
-            expr = pl.col(col).map_dict(
-                remapping=remapping,
+            expr = pl.col(col).replace(
+                remapping,
                 default=_UNKNOWN_VALUE,
             )
             X_lazy = X_lazy.with_columns(expr.alias(col))
@@ -208,8 +208,8 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
                 for category, local_mean, smoothing_factor in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
-            expr = pl.col(col).map_dict(
-                remapping=remapping,
+            expr = pl.col(col).replace(
+                remapping,
                 default=_UNKNOWN_VALUE,
             )
             X_lazy = X_lazy.with_columns(expr.alias(col))
