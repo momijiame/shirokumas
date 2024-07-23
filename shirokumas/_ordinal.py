@@ -63,7 +63,7 @@ class OrdinalEncoder(BaseEncoder):
         for col in self.mappings.keys():
             remapping = self.mappings[col]
             remapping[None] = missing_value
-            expr = pl.col(col).replace(
+            expr = pl.col(col).replace_strict(
                 remapping,
                 default=unknown_value,
             )

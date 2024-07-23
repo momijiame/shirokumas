@@ -39,7 +39,7 @@ class _GreedyTargetEncoder(BaseEncoder):
         self.encoder: BaseEncoder = encoder_cls(
             **(self.smoothing_params or {}),
         )
-        self.global_mean: float | None = None
+        self.global_mean: pl.PythonLiteral | None = None
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
         if y is None:
@@ -109,7 +109,7 @@ class _NoneSmoothingStrategy(BaseEstimator, TransformerMixin):
                 for category, local_mean in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
-            expr = pl.col(col).replace(
+            expr = pl.col(col).replace_strict(
                 remapping,
                 default=_UNKNOWN_VALUE,
             )
@@ -119,12 +119,12 @@ class _NoneSmoothingStrategy(BaseEstimator, TransformerMixin):
 
 
 class _MEstimateStrategy(BaseEstimator, TransformerMixin):
-    global_mean: float
 
     def __init__(self, m: float = 1.0):
         self.m = m
 
         self.mappings: dict[str, pl.DataFrame] = {}
+        self.global_mean: pl.PythonLiteral | None = None
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
         self.global_mean = y.mean()
@@ -155,7 +155,7 @@ class _MEstimateStrategy(BaseEstimator, TransformerMixin):
                 for category, local_count, local_sum in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
-            expr = pl.col(col).replace(
+            expr = pl.col(col).replace_strict(
                 remapping,
                 default=_UNKNOWN_VALUE,
             )
@@ -170,7 +170,7 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
         self.f = f
 
         self.mappings: dict[str, pl.DataFrame] = {}
-        self.global_mean: float | None = None
+        self.global_mean: pl.PythonLiteral | None = None
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
         self.global_mean = y.mean()
@@ -208,7 +208,7 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
                 for category, local_mean, smoothing_factor in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
-            expr = pl.col(col).replace(
+            expr = pl.col(col).replace_strict(
                 remapping,
                 default=_UNKNOWN_VALUE,
             )

@@ -1,7 +1,6 @@
 import pickle
 import tempfile
 
-import numpy as np
 import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
@@ -33,7 +32,7 @@ class TestCountEncoder:
         test_df = pl.DataFrame(
             {
                 "fruits": ["unseen", None, "banana"],
-                "users": ["alice", "unseen", np.nan],
+                "users": ["alice", "unseen", None],
             },
         )
         encoded_df = encoder.transform(test_df)

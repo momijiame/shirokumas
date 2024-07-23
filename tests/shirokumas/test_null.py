@@ -33,7 +33,7 @@ class TestNullEncoder:
         test_df = pl.DataFrame(
             {
                 "fruits": ["unseen", None, "banana"],
-                "prices": [300, 400, np.nan],
+                "prices": [300., 400., np.nan],
             },
         )
         encoded_df = encoder.transform(test_df)
