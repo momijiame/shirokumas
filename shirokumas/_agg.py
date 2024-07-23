@@ -54,16 +54,21 @@ class AggregateEncoder(BaseEncoder):
         X_lazy: pl.LazyFrame = X.select(self.mappings.keys()).lazy()
 
         for col, mapping in self.mappings.items():
-            col_remappings: dict[str, dict[str | None, float | int]] = defaultdict(
-                lambda: {None: missing_value}
-            )
+            col_remappings: dict[str, dict[str | None, float | int]] = defaultdict(dict)
+
             for category, *agg_values in mapping.rows():
                 for agg_name, agg_value in zip(mapping.columns[1:], agg_values):
                     col_remappings[agg_name][category] = agg_value
+
+            for agg_name, replace_map in col_remappings.items():
+                value_sample = next(iter(replace_map.values()))
+                cast_type = type(value_sample)
+                col_remappings[agg_name][None] = cast_type(missing_value)
+
             X_lazy = X_lazy.with_columns(
                 [
                     pl.col(col)
-                    .replace(remapping, default=unknown_value)
+                    .replace_strict(remapping, default=unknown_value)
                     .alias(agg_name)
                     for agg_name, remapping in col_remappings.items()
                 ]

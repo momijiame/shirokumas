@@ -54,7 +54,7 @@ class TestAggregateEncoder:
 
         expected_df = pl.DataFrame(
             {
-                "fruits_mean": [unknown, missing, 250.0],
+                "fruits_mean": [float(unknown), float(missing), 250.0],
                 "fruits_max": [unknown, missing, 300],
                 "vegetables_mean": [100.0, 100.0, 300.0],
                 "vegetables_max": [100, 100, 300],
