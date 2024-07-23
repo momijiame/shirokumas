@@ -36,7 +36,7 @@ class CountEncoder(BaseEncoder):
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
         cols = self.cols or X.columns
         for col in cols:
-            self.mappings[col] = X.group_by(col).count()
+            self.mappings[col] = X.group_by(col).len()
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         unknown_value = -1
@@ -47,7 +47,7 @@ class CountEncoder(BaseEncoder):
         for col, mapping in self.mappings.items():
             remapping = {category: count for category, count in mapping.rows()}
             remapping[None] = missing_value
-            expr = pl.col(col).replace(
+            expr = pl.col(col).replace_strict(
                 remapping,
                 default=unknown_value,
             )

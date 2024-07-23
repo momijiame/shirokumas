@@ -40,8 +40,8 @@ class TestOrdinalEncoder:
         test_df = pl.DataFrame(
             {
                 "fruits": ["unseen", None, "apple"],
-                "users": ["alice", "unseen", np.nan],
-            }
+                "users": ["alice", "unseen", None],
+            },
         )
         encoded_df = encoder.transform(test_df)
 
