@@ -13,8 +13,8 @@ from sklearn.model_selection import BaseCrossValidator
 from . import OutOfFoldEncodeWrapper
 from ._base import BaseEncoder
 
-_UNKNOWN_VALUE = -1
-_MISSING_VALUE = -2
+_UNKNOWN_VALUE = -1.0
+_MISSING_VALUE = -2.0
 
 
 class _GreedyTargetEncoder(BaseEncoder):
