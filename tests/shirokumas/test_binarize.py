@@ -174,6 +174,85 @@ class TestOneHotEncoder:
         )
         assert_frame_equal(encoded_df, expected_df)
 
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = OneHotEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False, False],
+                "fruits_banana": [False, True, True],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+            }
+        )
+        encoder = OneHotEncoder(cols=["fruits"])
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False, False],
+                "fruits_banana": [False, True, True],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_all_cols(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+            }
+        )
+        encoder = OneHotEncoder(remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False, False],
+                "fruits_banana": [False, True, True],
+                "users_alice": [True, False, False],
+                "users_bob": [False, True, False],
+                "users_charlie": [False, False, True],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_name_collision(self):
+        # the generated 'fruits_apple' would clash with the existing column
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "fruits_apple": [0, 1, 1],
+            }
+        )
+        encoder = OneHotEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        with pytest.raises(ValueError):
+            encoder.transform(train_df)
+
 
 class TestMultiLabelBinarizer:
     def test(self):
@@ -515,6 +594,113 @@ class TestMultiLabelBinarizer:
             }
         )
         assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple"],
+                    ["banana"],
+                    ["apple", "banana"],
+                ],
+                "users": [
+                    ["alice"],
+                    ["bob"],
+                    ["charlie"],
+                ],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = MultiLabelBinarizer(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False, True],
+                "fruits_banana": [False, True, True],
+                "users": [
+                    ["alice"],
+                    ["bob"],
+                    ["charlie"],
+                ],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple"],
+                    ["banana"],
+                    ["apple", "banana"],
+                ],
+                "users": [
+                    ["alice"],
+                    ["bob"],
+                    ["charlie"],
+                ],
+                "scores": [1.0, 2.0, 3.0],
+            }
+        )
+        encoder = MultiLabelBinarizer(cols=["fruits"])
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False, True],
+                "fruits_banana": [False, True, True],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_all_cols(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple"],
+                    ["banana"],
+                    ["apple", "banana"],
+                ],
+                "users": [
+                    ["alice"],
+                    ["bob"],
+                    ["charlie"],
+                ],
+            }
+        )
+        encoder = MultiLabelBinarizer(remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False, True],
+                "fruits_banana": [False, True, True],
+                "users_alice": [True, False, False],
+                "users_bob": [False, True, False],
+                "users_charlie": [False, False, True],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_name_collision(self):
+        # the generated 'tags_x' would clash with the existing column
+        train_df = pl.DataFrame(
+            {
+                "tags": [["x", "y"], ["y"], ["x"]],
+                "tags_x": [1, 0, 1],
+            }
+        )
+        encoder = MultiLabelBinarizer(cols=["tags"], remainder="passthrough")
+        encoder.fit(train_df)
+        with pytest.raises(ValueError):
+            encoder.transform(train_df)
 
 
 if __name__ == "__main__":

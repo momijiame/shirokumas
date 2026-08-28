@@ -17,6 +17,7 @@ class OrdinalEncoder(BaseEncoder):
         mappings: dict[str, dict[str, int]] | None = None,
         handle_unknown: Literal["value", "error"] = "value",
         handle_missing: Literal["value", "error"] = "value",
+        remainder: Literal["drop", "passthrough"] = "drop",
     ):
         """
 
@@ -28,13 +29,17 @@ class OrdinalEncoder(BaseEncoder):
         :param handle_unknown:
             choice of handling unknown values.
             defaults to 'value', unknown values are replaced by -1.
-            If 'error' is selected, ValueError is thrown when an unknown value is encountered.
+            if 'error' is selected, ValueError is thrown when an unknown value is encountered.
         :param handle_missing:
             choice of handling missing values.
             defaults to 'value', missing values are replaced by -2.
-            If 'error' is selected, ValueError is thrown when a missing value is encountered.
+            if 'error' is selected, ValueError is thrown when a missing value is encountered.
+        :param remainder:
+            specify how to handle columns that are not listed in `cols`.
+            defaults to 'drop', which removes unspecified columns from the output.
+            if set to 'passthrough', unspecified columns are included in the output.
         """
-        super().__init__(cols, handle_unknown, handle_missing)
+        super().__init__(cols, handle_unknown, handle_missing, remainder)
         self.mappings = mappings
         self.mappings_supplied = mappings is not None
 
@@ -49,6 +54,10 @@ class OrdinalEncoder(BaseEncoder):
             self.mappings[col] = {
                 value: i for i, value in enumerate(unique_values, start=1)
             }
+
+    def _encoded_cols(self) -> list[str]:
+        # the encoded set comes from the mappings, which may differ from cols
+        return list(self.mappings.keys()) if self.mappings else []
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         if self.mappings is None:

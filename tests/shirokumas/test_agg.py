@@ -197,6 +197,54 @@ class TestAggregateEncoder:
         )
         assert_frame_equal(encoded_df, expected_df)
 
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "apple"],
+                "price": [100, 200, 300],
+                "category": ["A", "B", "A"],
+                "score": [1.0, 2.0, 3.0],
+            }
+        )
+        encoder = AggregateEncoder(
+            cols=["fruits"],
+            agg_exprs={"mean": pl.col("price").mean()},
+            remainder="passthrough",
+        )
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_mean": [200.0, 200.0, 200.0],
+                "price": [100, 200, 300],
+                "category": ["A", "B", "A"],
+                "score": [1.0, 2.0, 3.0],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "apple"],
+                "price": [100, 200, 300],
+                "category": ["A", "B", "A"],
+            }
+        )
+        encoder = AggregateEncoder(
+            cols=["fruits"], agg_exprs={"mean": pl.col("price").mean()}
+        )
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_mean": [200.0, 200.0, 200.0],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
 
 if __name__ == "__main__":
     import sys

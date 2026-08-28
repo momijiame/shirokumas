@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import polars as pl
 
 from ._base import BaseEncoder
@@ -13,14 +15,19 @@ class NullEncoder(BaseEncoder):
     def __init__(
         self,
         cols: list[str] | None = None,
+        remainder: Literal["drop", "passthrough"] = "drop",
     ):
         """
 
         :param cols:
             a list of columns to encode.
             if None is specified, all columns will be encoded.
+        :param remainder:
+            specify how to handle columns that are not listed in `cols`.
+            defaults to 'drop', which removes unspecified columns from the output.
+            if set to 'passthrough', unspecified columns are included in the output.
         """
-        super().__init__(cols, None, None)
+        super().__init__(cols, None, None, remainder)
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
         self._target_cols = self.cols or X.columns

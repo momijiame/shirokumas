@@ -12,6 +12,7 @@ from sklearn.model_selection import BaseCrossValidator
 
 from . import OutOfFoldEncodeWrapper
 from ._base import BaseEncoder
+from ._exceptions import NotFittedException
 
 _UNKNOWN_VALUE = -1.0
 _MISSING_VALUE = -2.0
@@ -25,21 +26,25 @@ class _GreedyTargetEncoder(BaseEncoder):
         cols: list[str] | None = None,
         handle_unknown: Literal["value", "error"] = "value",
         handle_missing: Literal["value", "error"] = "value",
+        remainder: Literal["drop", "passthrough"] = "drop",
     ):
-        super().__init__(cols, handle_unknown, handle_missing)
+        super().__init__(cols, handle_unknown, handle_missing, remainder)
         self.smoothing_method = smoothing_method
         self.smoothing_params = smoothing_params
 
+        self.encoder: BaseEstimator | None = None
+        self.global_mean: pl.PythonLiteral | None = None
+
+    def _build_encoder(self) -> BaseEstimator:
         encoder_classes = {
             "none": _NoneSmoothingStrategy,
             "m-estimate": _MEstimateStrategy,
             "eb": _EmpiricalBayesianStrategy,
         }
         encoder_cls = encoder_classes[self.smoothing_method]
-        self.encoder: BaseEncoder = encoder_cls(
+        return encoder_cls(
             **(self.smoothing_params or {}),
         )
-        self.global_mean: pl.PythonLiteral | None = None
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
         if y is None:
@@ -47,6 +52,9 @@ class _GreedyTargetEncoder(BaseEncoder):
 
         self.cols = self.cols or X.columns
         self.global_mean = y.mean()
+
+        # built here rather than in __init__ so that set_params() takes effect
+        self.encoder = self._build_encoder()
 
         X = X.select(self.cols)
         return self.encoder.fit(X, y, **fit_params)
@@ -229,6 +237,7 @@ class TargetEncoder(BaseEstimator, TransformerMixin):
         cols: list[str] | None = None,
         handle_unknown: Literal["value", "error"] = "value",
         handle_missing: Literal["value", "error"] = "value",
+        remainder: Literal["drop", "passthrough"] = "drop",
     ):
         """
 
@@ -253,11 +262,15 @@ class TargetEncoder(BaseEstimator, TransformerMixin):
         :param handle_unknown:
             choice of handling unknown values.
             defaults to 'value', unknown values are replaced by global mean.
-            If 'error' is selected, ValueError is thrown when an unknown value is encountered.
+            if 'error' is selected, ValueError is thrown when an unknown value is encountered.
         :param handle_missing:
             choice of handling missing values.
             defaults to 'value', missing values are replaced by global mean.
-            If 'error' is selected, ValueError is thrown when a missing value is encountered.
+            if 'error' is selected, ValueError is thrown when a missing value is encountered.
+        :param remainder:
+            specify how to handle columns that are not listed in `cols`.
+            defaults to 'drop', which removes unspecified columns from the output.
+            if set to 'passthrough', unspecified columns are included in the output.
         """
         self.folds = folds
         self.folds_params = folds_params
@@ -266,23 +279,44 @@ class TargetEncoder(BaseEstimator, TransformerMixin):
         self.cols = cols
         self.handle_unknown = handle_unknown
         self.handle_missing = handle_missing
+        self.remainder = remainder
 
+        self.encoder: OutOfFoldEncodeWrapper | None = None
+
+    def _build_encoder(self) -> OutOfFoldEncodeWrapper:
         inner_encoder = _GreedyTargetEncoder(
-            smoothing_method=smoothing_method,
-            smoothing_params=smoothing_params,
-            cols=cols,
-            handle_unknown=handle_unknown,
-            handle_missing=handle_missing,
+            smoothing_method=self.smoothing_method,
+            smoothing_params=self.smoothing_params,
+            cols=self.cols,
+            handle_unknown=self.handle_unknown,
+            handle_missing=self.handle_missing,
+            remainder=self.remainder,
         )
-        self.encoder = OutOfFoldEncodeWrapper(
+        return OutOfFoldEncodeWrapper(
             inner=inner_encoder,
-            folds=folds,
-            folds_params=folds_params,
+            folds=self.folds,
+            folds_params=self.folds_params,
         )
 
     def fit(self, X: pl.DataFrame, y: pl.Series, **fit_params):
+        """Train the features.
+
+        :param X:
+            explanatory feature.
+        :param y:
+            objective feature.
+        """
+        # built here rather than in __init__ so that set_params() takes effect
+        self.encoder = self._build_encoder()
         self.encoder.fit(X, y, **fit_params)
         return self
 
     def transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
+        """Transform the features.
+
+        :param X:
+            explanatory feature.
+        """
+        if self.encoder is None:
+            raise NotFittedException("This encoder instance is not fitted yet")
         return self.encoder.transform(X, **transform_params)

@@ -1,0 +1,51 @@
+<prepare-dataframe>
+>>> train_df = pl.DataFrame({
+...     "fruits": ["apple", "banana", "cherry"],
+...     "price": [100, 200, 300],
+... })
+</prepare-dataframe>
+
+<default-drop>
+>>> encoder = sk.OrdinalEncoder(cols=["fruits"])
+>>> encoder.fit_transform(train_df)
+shape: (3, 1)
+┌────────┐
+│ fruits │
+│ ---    │
+│ i64    │
+╞════════╡
+│ 1      │
+│ 2      │
+│ 3      │
+└────────┘
+</default-drop>
+
+<passthrough>
+>>> encoder = sk.OrdinalEncoder(cols=["fruits"], remainder="passthrough")
+>>> encoder.fit_transform(train_df)
+shape: (3, 2)
+┌────────┬───────┐
+│ fruits ┆ price │
+│ ---    ┆ ---   │
+│ i64    ┆ i64   │
+╞════════╪═══════╡
+│ 1      ┆ 100   │
+│ 2      ┆ 200   │
+│ 3      ┆ 300   │
+└────────┴───────┘
+</passthrough>
+
+<passthrough-generated-columns>
+>>> encoder = sk.OneHotEncoder(cols=["fruits"], remainder="passthrough")
+>>> encoder.fit_transform(train_df)
+shape: (3, 4)
+┌──────────────┬───────────────┬───────────────┬───────┐
+│ fruits_apple ┆ fruits_banana ┆ fruits_cherry ┆ price │
+│ ---          ┆ ---           ┆ ---           ┆ ---   │
+│ bool         ┆ bool          ┆ bool          ┆ i64   │
+╞══════════════╪═══════════════╪═══════════════╪═══════╡
+│ true         ┆ false         ┆ false         ┆ 100   │
+│ false        ┆ true          ┆ false         ┆ 200   │
+│ false        ┆ false         ┆ true          ┆ 300   │
+└──────────────┴───────────────┴───────────────┴───────┘
+</passthrough-generated-columns>
