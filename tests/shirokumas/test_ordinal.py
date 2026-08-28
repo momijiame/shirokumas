@@ -215,6 +215,198 @@ class TestOrdinalEncoder:
         )
         assert_frame_equal(encoded_df, expected_df)
 
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = OrdinalEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+            }
+        )
+        encoder = OrdinalEncoder(cols=["fruits"])
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_with_narrower_mappings(self):
+        # the encoded set comes from the supplied mappings, not from cols,
+        # which fit() expands to every column
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = OrdinalEncoder(
+            mappings={"fruits": {"apple": 1, "banana": 2}},
+            remainder="passthrough",
+        )
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+                "users": ["alice", "bob", "charlie"],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_with_cols_wider_than_mappings(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = OrdinalEncoder(
+            cols=["fruits", "users"],
+            mappings={"fruits": {"apple": 1, "banana": 2}},
+            remainder="passthrough",
+        )
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+                "users": ["alice", "bob", "charlie"],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough_with_mappings_wider_than_cols(self):
+        # the encoded columns must not also be passed through
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = OrdinalEncoder(
+            cols=["fruits"],
+            mappings={
+                "fruits": {"apple": 1, "banana": 2},
+                "users": {"alice": 1, "bob": 2, "charlie": 3},
+            },
+            remainder="passthrough",
+        )
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+                "users": [1, 2, 3],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_invalid_value(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+            }
+        )
+        encoder = OrdinalEncoder(cols=["fruits"], remainder="pass_through")
+        with pytest.raises(ValueError):
+            encoder.fit(train_df)
+
+    def test_remainder_passthrough_unexpected_column(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "ids": [10, 20, 30],
+            }
+        )
+        test_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "ids": [40, 50, 60],
+                "leak": [1, 2, 3],
+            }
+        )
+        encoder = OrdinalEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        with pytest.raises(ValueError):
+            encoder.transform(test_df)
+
+    def test_remainder_passthrough_reordered_columns(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "ids": [10, 20, 30],
+                "users": ["alice", "bob", "charlie"],
+            }
+        )
+        test_df = train_df.select(["fruits", "users", "ids"])
+        encoder = OrdinalEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        with pytest.raises(ValueError):
+            encoder.transform(test_df)
+
+    def test_remainder_drop_ignores_extra_columns(self):
+        # with 'drop' the output is the encoded columns whatever else is
+        # handed over, so nothing diverges and nothing should be rejected
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "ids": [10, 20, 30],
+            }
+        )
+        test_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "extra": [1, 2, 3],
+            }
+        )
+        encoder = OrdinalEncoder(cols=["fruits"])
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(test_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
 
 if __name__ == "__main__":
     import sys

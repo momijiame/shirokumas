@@ -76,12 +76,20 @@ class OutOfFoldEncodeWrapper(BaseEstimator, TransformerMixin):
 
     def _transform_train(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         transformed_dfs = []
+        source_rows: list[int] = []
         for encoder, (_, eval_indices) in zip(self.train_encoders, self._split_indices):
             X_eval = X[eval_indices]
             transformed_df = encoder.transform(X_eval, **transform_params)
             transformed_dfs.append(transformed_df)
+            source_rows.extend(int(index) for index in eval_indices)
 
-        return pl.concat(transformed_dfs)
+        transformed = pl.concat(transformed_dfs)
+
+        # the folds are concatenated in fold order, which is the input order
+        # only when the folds are contiguous and ascending. put the rows back
+        # where they came from so the output lines up with X row by row.
+        original_order = sorted(range(len(source_rows)), key=source_rows.__getitem__)
+        return transformed[original_order]
 
     def _transform_test(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         return self._test_encoder.transform(X, **transform_params)

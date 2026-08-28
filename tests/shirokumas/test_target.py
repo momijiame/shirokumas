@@ -302,6 +302,56 @@ class TestGreedyTargetEncoder:
         with pytest.raises(ValueError):
             encoder.transform(test_df)
 
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "apple", "banana", "banana"],
+                "users": ["alice", "bob", "alice", "bob"],
+                "scores": [1.0, 2.0, 3.0, 4.0],
+                "ids": [10, 20, 30, 40],
+            }
+        )
+        train_y = pl.Series(
+            name="target",
+            values=[0, 1, 1, 0],
+        )
+        encoder = _GreedyTargetEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df, train_y)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [0.5, 0.5, 0.5, 0.5],
+                "users": ["alice", "bob", "alice", "bob"],
+                "scores": [1.0, 2.0, 3.0, 4.0],
+                "ids": [10, 20, 30, 40],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "apple", "banana", "banana"],
+                "users": ["alice", "bob", "alice", "bob"],
+                "scores": [1.0, 2.0, 3.0, 4.0],
+            }
+        )
+        train_y = pl.Series(
+            name="target",
+            values=[0, 1, 1, 0],
+        )
+        encoder = _GreedyTargetEncoder(cols=["fruits"])
+        encoder.fit(train_df, train_y)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [0.5, 0.5, 0.5, 0.5],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
 
 class TestTargetEncoder:
     def test(self):
@@ -404,6 +454,78 @@ class TestTargetEncoder:
             }
         )
         assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana", "apple"],
+                "users": ["alice", "bob", "alice", "bob"],
+                "scores": [1.0, 2.0, 3.0, 4.0],
+                "ids": [10, 20, 30, 40],
+            }
+        )
+        train_y = pl.Series(
+            name="target",
+            values=[1, 0, 1, 1],
+        )
+        folds = KFold(n_splits=4, shuffle=False)
+        encoder = TargetEncoder(folds=folds, cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df, train_y)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1.0, 1.0, 0.0, 1.0],
+                "users": ["alice", "bob", "alice", "bob"],
+                "scores": [1.0, 2.0, 3.0, 4.0],
+                "ids": [10, 20, 30, 40],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana", "apple"],
+                "users": ["alice", "bob", "alice", "bob"],
+                "scores": [1.0, 2.0, 3.0, 4.0],
+            }
+        )
+        train_y = pl.Series(
+            name="target",
+            values=[1, 0, 1, 1],
+        )
+        folds = KFold(n_splits=4, shuffle=False)
+        encoder = TargetEncoder(folds=folds, cols=["fruits"])
+        encoder.fit(train_df, train_y)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1.0, 1.0, 0.0, 1.0],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_set_params(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana", "apple"],
+                "ids": [10, 20, 30, 40],
+            }
+        )
+        train_y = pl.Series(
+            name="target",
+            values=[1, 0, 1, 1],
+        )
+        folds = KFold(n_splits=2, shuffle=False)
+        encoder = TargetEncoder(folds=folds, cols=["fruits"])
+        # the wrapped encoder is built at fit time, so this has to take effect
+        encoder.set_params(remainder="passthrough")
+        encoder.fit(train_df, train_y)
+        encoded_df = encoder.transform(train_df)
+
+        assert encoded_df.columns == ["fruits", "ids"]
 
 
 if __name__ == "__main__":

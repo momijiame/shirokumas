@@ -165,6 +165,48 @@ class TestCountEncoder:
         )
         assert_frame_equal(encoded_df, expected_df)
 
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = CountEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", "banana", "banana"],
+                "users": ["alice", "bob", "charlie"],
+                "scores": [1.0, 2.0, 3.0],
+            }
+        )
+        encoder = CountEncoder(cols=["fruits"])
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [1, 2, 2],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
 
 if __name__ == "__main__":
     import sys

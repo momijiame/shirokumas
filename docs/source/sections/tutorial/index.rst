@@ -17,3 +17,7 @@ The following sections explain how to use each encoder.
 .. include:: null.rst
 .. include:: target.rst
 .. include:: agg.rst
+
+The following section explains an option that is common to all the encoders.
+
+.. include:: remainder.rst

@@ -106,6 +106,48 @@ class TestNullEncoder:
         )
         assert_frame_equal(encoded_df, expected_df)
 
+    def test_remainder_passthrough(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", None, "banana"],
+                "category": ["A", "B", "A"],
+                "score": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        encoder = NullEncoder(cols=["fruits"], remainder="passthrough")
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [False, True, False],
+                "category": ["A", "B", "A"],
+                "score": [1.0, 2.0, 3.0],
+                "ids": [10, 20, 30],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_remainder_drop_default(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": ["apple", None, "banana"],
+                "category": ["A", "B", "A"],
+                "score": [1.0, 2.0, 3.0],
+            }
+        )
+        encoder = NullEncoder(cols=["fruits"])
+        encoder.fit(train_df)
+        encoded_df = encoder.transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits": [False, True, False],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
 
 if __name__ == "__main__":
     import sys

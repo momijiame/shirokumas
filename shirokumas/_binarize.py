@@ -15,6 +15,7 @@ class OneHotEncoder(BaseEncoder):
         cols: list[str] | None = None,
         handle_unknown: Literal["value", "error"] = "value",
         handle_missing: Literal["value", "error"] = "value",
+        remainder: Literal["drop", "passthrough"] = "drop",
     ):
         """
 
@@ -24,13 +25,17 @@ class OneHotEncoder(BaseEncoder):
         :param handle_unknown:
             choice of handling unknown values.
             defaults to 'value', unknown values are replaced by all zero columns.
-            If 'error' is selected, ValueError is thrown when an unknown value is encountered.
+            if 'error' is selected, ValueError is thrown when an unknown value is encountered.
         :param handle_missing:
             choice of handling missing values.
             defaults to 'value', missing values are replaced by all zero columns.
-            If 'error' is selected, ValueError is thrown when a missing value is encountered.
+            if 'error' is selected, ValueError is thrown when a missing value is encountered.
+        :param remainder:
+            specify how to handle columns that are not listed in `cols`.
+            defaults to 'drop', which removes unspecified columns from the output.
+            if set to 'passthrough', unspecified columns are included in the output.
         """
-        super().__init__(cols, handle_unknown, handle_missing)
+        super().__init__(cols, handle_unknown, handle_missing, remainder)
         self.mappings: dict[str, pl.Series] = {}
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
@@ -39,6 +44,10 @@ class OneHotEncoder(BaseEncoder):
         for col in cols:
             unique_values = X.get_column(col).unique(maintain_order=True)
             self.mappings[col] = unique_values
+
+    def _encoded_cols(self) -> list[str]:
+        # the encoded set comes from the mappings, which may differ from cols
+        return list(self.mappings.keys())
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         X_lazy: pl.LazyFrame = X.select(self.mappings.keys()).lazy()
@@ -78,6 +87,7 @@ class MultiLabelBinarizer(BaseEncoder):
         cols: list[str] | None = None,
         handle_unknown: Literal["value", "error"] = "value",
         handle_missing: Literal["value", "error"] = "value",
+        remainder: Literal["drop", "passthrough"] = "drop",
     ):
         """
 
@@ -87,13 +97,17 @@ class MultiLabelBinarizer(BaseEncoder):
         :param handle_unknown:
             choice of handling unknown values.
             defaults to 'value', unknown values are replaced by all zero columns.
-            If 'error' is selected, ValueError is thrown when an unknown value is encountered.
+            if 'error' is selected, ValueError is thrown when an unknown value is encountered.
         :param handle_missing:
             choice of handling missing values.
             defaults to 'value', missing values are replaced by all zero columns.
-            If 'error' is selected, ValueError is thrown when a missing value is encountered.
+            if 'error' is selected, ValueError is thrown when a missing value is encountered.
+        :param remainder:
+            specify how to handle columns that are not listed in `cols`.
+            defaults to 'drop', which removes unspecified columns from the output.
+            if set to 'passthrough', unspecified columns are included in the output.
         """
-        super().__init__(cols, handle_unknown, handle_missing)
+        super().__init__(cols, handle_unknown, handle_missing, remainder)
         self.mappings: dict[str, pl.Series] = {}
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
@@ -112,6 +126,10 @@ class MultiLabelBinarizer(BaseEncoder):
 
             unique_values = exploded_items.unique(maintain_order=True)
             self.mappings[col] = unique_values
+
+    def _encoded_cols(self) -> list[str]:
+        # the encoded set comes from the mappings, which may differ from cols
+        return list(self.mappings.keys())
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         X_lazy: pl.LazyFrame = X.select(self.mappings.keys()).lazy()
