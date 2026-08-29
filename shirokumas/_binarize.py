@@ -102,6 +102,7 @@ class MultiLabelBinarizer(BaseEncoder):
             choice of handling missing values.
             defaults to 'value', missing values are replaced by all zero columns.
             if 'error' is selected, ValueError is thrown when a missing value is encountered.
+            an empty list counts as no labels rather than as a missing value.
         :param remainder:
             specify how to handle columns that are not listed in `cols`.
             defaults to 'drop', which removes unspecified columns from the output.
@@ -117,7 +118,7 @@ class MultiLabelBinarizer(BaseEncoder):
             if X.get_column(col).dtype != pl.List:
                 raise ValueError("Columns are expected to contain only List")
 
-            exploded_items = X.get_column(col).explode()
+            exploded_items = X.get_column(col).explode(empty_as_null=False)
 
             if self.handle_missing == "error":
                 contains_missing = exploded_items.is_null().sum() > 0
@@ -139,13 +140,13 @@ class MultiLabelBinarizer(BaseEncoder):
                 raise ValueError("Columns are expected to contain only List")
 
             if self.handle_missing == "error":
-                exploded_items = X.get_column(col).explode()
+                exploded_items = X.get_column(col).explode(empty_as_null=False)
                 contains_missing = exploded_items.is_null().sum() > 0
                 if contains_missing:
                     raise ValueError("Columns to be encoded can not contain null")
 
             if self.handle_unknown == "error":
-                exploded_items = X.get_column(col).explode()
+                exploded_items = X.get_column(col).explode(empty_as_null=False)
                 transform_unique_values = set(exploded_items.unique().to_list())
                 mapping_unique_values = set(unique_values.to_list())
                 unknown_value = transform_unique_values - mapping_unique_values
