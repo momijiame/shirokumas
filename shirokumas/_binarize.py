@@ -39,7 +39,7 @@ class OneHotEncoder(BaseEncoder):
         self.mappings: dict[str, pl.Series] = {}
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
-        cols = self.cols or X.columns
+        cols = self.cols_
 
         for col in cols:
             unique_values = X.get_column(col).unique(maintain_order=True)
@@ -112,7 +112,7 @@ class MultiLabelBinarizer(BaseEncoder):
         self.mappings: dict[str, pl.Series] = {}
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
-        cols = self.cols or X.columns
+        cols = self.cols_
 
         for col in cols:
             if X.get_column(col).dtype != pl.List:

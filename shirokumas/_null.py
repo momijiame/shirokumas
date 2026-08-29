@@ -10,8 +10,6 @@ from ._base import BaseEncoder
 class NullEncoder(BaseEncoder):
     """Encode whether the feature is null or not with boolean values."""
 
-    _target_cols: list[str]
-
     def __init__(
         self,
         cols: list[str] | None = None,
@@ -30,12 +28,13 @@ class NullEncoder(BaseEncoder):
         super().__init__(cols, None, None, remainder)
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
-        self._target_cols = self.cols or X.columns
+        # nothing to learn: whether a value is null is decided per row
+        pass
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
-        X_lazy: pl.LazyFrame = X.select(self._target_cols).lazy()
+        X_lazy: pl.LazyFrame = X.select(self.cols_).lazy()
 
-        for col in self._target_cols:
+        for col in self.cols_:
             expr = pl.when(pl.col(col).is_null()).then(1).otherwise(0).cast(pl.Boolean)
             X_lazy = X_lazy.with_columns(expr.alias(col))
 

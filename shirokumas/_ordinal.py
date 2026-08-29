@@ -48,7 +48,7 @@ class OrdinalEncoder(BaseEncoder):
             return
 
         self.mappings = {}
-        cols = self.cols or X.columns
+        cols = self.cols_
         for col in cols:
             unique_values = X.get_column(col).unique(maintain_order=True).to_list()
             self.mappings[col] = {

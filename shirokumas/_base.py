@@ -11,6 +11,12 @@ from ._exceptions import NotFittedException
 
 
 class BaseEncoder(BaseEstimator, TransformerMixin):
+    # the columns actually encoded, resolved at fit time.
+    # `cols` stays exactly as the user passed it, per the scikit-learn rule
+    # that fit must not touch constructor parameters, so `cols=None` keeps
+    # meaning "every column" in a clone taken from a fitted encoder.
+    cols_: list[str]
+
     def __init__(
         self,
         cols: list[str] | None,
@@ -39,10 +45,10 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
                 f"remainder must be either 'drop' or 'passthrough', got {self.remainder!r}"
             )
 
-        self.cols = self.cols or X.columns
+        self.cols_ = list(self.cols) if self.cols else X.columns
 
         if self.handle_missing == "error":
-            contains_missing = X.select(self.cols).null_count() > 0
+            contains_missing = X.select(self.cols_).null_count() > 0
             for col in contains_missing.columns:
                 if contains_missing.get_column(col)[0]:
                     raise ValueError("Columns to be encoded can not contain null")
@@ -70,7 +76,7 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
         self._check_col_names(X)
 
         if self.handle_missing == "error":
-            contains_missing = X.select(self.cols).null_count() > 0
+            contains_missing = X.select(self.cols_).null_count() > 0
             for col in contains_missing.columns:
                 if contains_missing.get_column(col)[0]:
                     raise ValueError("Columns to be encoded can not contain null")
@@ -120,10 +126,11 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
 
         subclasses that encode a set of columns derived from something other
         than `cols` (a supplied `mappings`, for example) must override this.
-        the declared `cols` is not a substitute: `fit` expands it to every
-        column, and a subclass may encode more or fewer columns than it lists.
+        the declared `cols` is not a substitute: it is None when every column
+        is meant, and a subclass may encode more or fewer columns than it
+        lists.
         """
-        return list(self.cols or [])
+        return list(self.cols_)
 
     def _handle_remainder(
         self,
