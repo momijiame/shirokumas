@@ -499,6 +499,92 @@ class TestMultiLabelBinarizer:
         with pytest.raises(ValueError):
             encoder.transform(test_df)
 
+    def test_empty_list_is_not_missing_fit(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple", "banana"],
+                    [],
+                ],
+                "users": [
+                    ["alice"],
+                    ["bob"],
+                ],
+            }
+        )
+        encoder = MultiLabelBinarizer(handle_missing="error")
+        encoded_df = encoder.fit_transform(train_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False],
+                "fruits_banana": [True, False],
+                "users_alice": [True, False],
+                "users_bob": [False, True],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_empty_list_is_not_missing_transform(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple", "banana"],
+                    ["apple"],
+                ],
+            }
+        )
+        encoder = MultiLabelBinarizer(handle_missing="error")
+        encoder.fit(train_df)
+
+        test_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple"],
+                    [],
+                ],
+            }
+        )
+        encoded_df = encoder.transform(test_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False],
+                "fruits_banana": [False, False],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
+    def test_empty_list_is_not_unknown(self):
+        train_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple"],
+                    ["banana"],
+                ],
+            }
+        )
+        encoder = MultiLabelBinarizer(handle_unknown="error")
+        encoder.fit(train_df)
+
+        test_df = pl.DataFrame(
+            {
+                "fruits": [
+                    ["apple"],
+                    [],
+                ],
+            }
+        )
+        encoded_df = encoder.transform(test_df)
+
+        expected_df = pl.DataFrame(
+            {
+                "fruits_apple": [True, False],
+                "fruits_banana": [False, False],
+            }
+        )
+        assert_frame_equal(encoded_df, expected_df)
+
     def test_handle_unknown_error(self):
         train_df = pl.DataFrame(
             {
