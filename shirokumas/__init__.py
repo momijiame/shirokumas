@@ -1,20 +1,20 @@
-from ._agg import AggregateEncoder  # noqa: F401
-from ._binarize import MultiLabelBinarizer  # noqa: F401
-from ._binarize import OneHotEncoder  # noqa: F401
-from ._count import CountEncoder  # noqa: F401
-from ._null import NullEncoder  # noqa: F401
-from ._oof import OutOfFoldEncodeWrapper  # noqa: F401
-from ._ordinal import OrdinalEncoder  # noqa: F401
-from ._target import TargetEncoder  # noqa: F401
+from ._agg import AggregateEncoder
+from ._binarize import MultiLabelBinarizer
+from ._binarize import OneHotEncoder
+from ._count import CountEncoder
+from ._null import NullEncoder
+from ._oof import OutOfFoldEncodeWrapper
+from ._ordinal import OrdinalEncoder
+from ._target import TargetEncoder
 
 __version__ = "0.0.4"
 __all__ = [
     "AggregateEncoder",
     "CountEncoder",
+    "MultiLabelBinarizer",
     "NullEncoder",
     "OneHotEncoder",
-    "MultiLabelBinarizer",
     "OrdinalEncoder",
-    "TargetEncoder",
     "OutOfFoldEncodeWrapper",
+    "TargetEncoder",
 ]
