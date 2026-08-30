@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Iterable
 from typing import Literal
+from typing import cast
 
 import polars as pl
 from scipy.special import expit  # pylint: disable=no-name-in-module
@@ -33,7 +34,7 @@ class _GreedyTargetEncoder(BaseEncoder):
         self.smoothing_params = smoothing_params
 
         self.encoder: BaseEstimator | None = None
-        self.global_mean: pl.PythonLiteral | None = None
+        self.global_mean: float | None = None
 
     def _build_encoder(self) -> BaseEstimator:
         encoder_classes = {
@@ -50,7 +51,8 @@ class _GreedyTargetEncoder(BaseEncoder):
         if y is None:
             raise ValueError("Need 'y' parameter")
 
-        self.global_mean = y.mean()
+        # Series.mean() is declared wider than a target column can be
+        self.global_mean = cast(float, y.mean())
 
         # built here rather than in __init__ so that set_params() takes effect
         self.encoder = self._build_encoder()
@@ -121,10 +123,11 @@ class _MEstimateStrategy(BaseEstimator, TransformerMixin):
         self.m = m
 
         self.mappings: dict[str, pl.DataFrame] = {}
-        self.global_mean: pl.PythonLiteral | None = None
+        self.global_mean: float | None = None
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
-        self.global_mean = y.mean()
+        # Series.mean() is declared wider than a target column can be
+        self.global_mean = cast(float, y.mean())
 
         X_lazy: pl.LazyFrame = X.lazy().with_columns(y)
 
@@ -165,10 +168,11 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
         self.f = f
 
         self.mappings: dict[str, pl.DataFrame] = {}
-        self.global_mean: pl.PythonLiteral | None = None
+        self.global_mean: float | None = None
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
-        self.global_mean = y.mean()
+        # Series.mean() is declared wider than a target column can be
+        self.global_mean = cast(float, y.mean())
 
         X_lazy: pl.LazyFrame = X.lazy().with_columns(y)
 
