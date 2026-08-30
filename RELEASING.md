@@ -17,7 +17,7 @@ metadata the build produced rather than being the thing that feeds it.
 | --- | --- |
 | exactly on `v0.1.0`, clean tree | `0.1.0` |
 | a few commits past it | `0.1.1.dev3+g1a2b3c4` |
-| no reachable tag | `0.1.dev58+g1a2b3c4` |
+| on a tagged commit with a dirty tree | `0.1.1.dev0+g1a2b3c4.d20260830` |
 
 The `v` prefix is stripped by setuptools-scm's default tag pattern, so keep naming tags
 `vX.Y.Z`.
@@ -93,9 +93,3 @@ number. Hence step 3.
 **Both workflows check out with `fetch-depth: 0`.** The default shallow clone carries no
 tags, which would leave every build claiming to be a development version. Do not drop
 it.
-
-**The tags `v0.0.1`..`v0.0.4` are not reachable from `main`.** They point into a history
-that was later rewritten and share no common ancestor with `main`, which is why an
-untagged `main` reports `0.1.devN` rather than `0.0.5.devN`. It has no effect on
-releases: the published version depends only on the tag the release is cut from, so a
-new tag produces exactly the version it names. The old tags do not need to be repaired.
