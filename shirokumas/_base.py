@@ -41,9 +41,7 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
             objective feature.
         """
         if self.remainder not in ("drop", "passthrough"):
-            raise ValueError(
-                f"remainder must be either 'drop' or 'passthrough', got {self.remainder!r}"
-            )
+            raise ValueError(f"remainder must be either 'drop' or 'passthrough', got {self.remainder!r}")
 
         self.cols_ = list(self.cols) if self.cols else X.columns
 
@@ -113,8 +111,7 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
         unexpected = [col for col in X.columns if col not in fitted]
         if missing or unexpected:
             raise ValueError(
-                "Columns do not match the ones seen during fit "
-                f"(missing: {missing}, unexpected: {unexpected})"
+                f"Columns do not match the ones seen during fit (missing: {missing}, unexpected: {unexpected})"
             )
         raise ValueError(
             "Columns must be in the same order as the ones seen during fit "
@@ -147,17 +144,10 @@ class BaseEncoder(BaseEstimator, TransformerMixin):
         if self.remainder == "passthrough":
             encoded_cols = self._encoded_cols()
             # Get columns that were not encoded
-            passthrough_cols = [
-                col for col in original_df.columns if col not in encoded_cols
-            ]
-            collisions = [
-                col for col in passthrough_cols if col in transformed_df.columns
-            ]
+            passthrough_cols = [col for col in original_df.columns if col not in encoded_cols]
+            collisions = [col for col in passthrough_cols if col in transformed_df.columns]
             if collisions:
-                raise ValueError(
-                    "Encoded columns collide with the columns to pass through: "
-                    f"{collisions}"
-                )
+                raise ValueError(f"Encoded columns collide with the columns to pass through: {collisions}")
             if passthrough_cols:
                 passthrough_data = original_df.select(passthrough_cols)
                 # Concatenate encoded columns (left) with passthrough columns (right)

@@ -48,9 +48,7 @@ class AggregateEncoder(BaseEncoder):
         for col in self.cols_:
             self.mappings[col] = X.group_by(
                 by=col,
-            ).agg(
-                [expr.alias(f"{col}_{name}") for name, expr in self.agg_exprs.items()]
-            )
+            ).agg([expr.alias(f"{col}_{name}") for name, expr in self.agg_exprs.items()])
 
     def _encoded_cols(self) -> list[str]:
         # the encoded set comes from the mappings, which may differ from cols
@@ -76,9 +74,7 @@ class AggregateEncoder(BaseEncoder):
 
             X_lazy = X_lazy.with_columns(
                 [
-                    pl.col(col)
-                    .replace_strict(remapping, default=unknown_value)
-                    .alias(agg_name)
+                    pl.col(col).replace_strict(remapping, default=unknown_value).alias(agg_name)
                     for agg_name, remapping in col_remappings.items()
                 ]
             )
@@ -89,8 +85,6 @@ class AggregateEncoder(BaseEncoder):
             contains_unknown = transformed.select(pl.col("*") == unknown_value).sum()
             for col in contains_unknown.columns:
                 if contains_unknown.get_column(col)[0] > 0:
-                    raise ValueError(
-                        "Columns to be encoded can not contain unknown value"
-                    )
+                    raise ValueError("Columns to be encoded can not contain unknown value")
 
         return transformed

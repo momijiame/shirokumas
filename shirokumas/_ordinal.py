@@ -51,9 +51,7 @@ class OrdinalEncoder(BaseEncoder):
         cols = self.cols_
         for col in cols:
             unique_values = X.get_column(col).unique(maintain_order=True).to_list()
-            self.mappings[col] = {
-                value: i for i, value in enumerate(unique_values, start=1)
-            }
+            self.mappings[col] = {value: i for i, value in enumerate(unique_values, start=1)}
 
     def _encoded_cols(self) -> list[str]:
         # the encoded set comes from the mappings, which may differ from cols
@@ -84,8 +82,6 @@ class OrdinalEncoder(BaseEncoder):
             contains_unknown = transformed.select(pl.col("*") == unknown_value).sum()
             for col in contains_unknown.columns:
                 if contains_unknown.get_column(col)[0] > 0:
-                    raise ValueError(
-                        "Columns to be encoded can not contain unknown value"
-                    )
+                    raise ValueError("Columns to be encoded can not contain unknown value")
 
         return transformed

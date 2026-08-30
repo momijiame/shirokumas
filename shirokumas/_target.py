@@ -67,9 +67,7 @@ class _GreedyTargetEncoder(BaseEncoder):
             contains_unknown = transformed.select(pl.col("*") == _UNKNOWN_VALUE).sum()
             for col in contains_unknown.columns:
                 if contains_unknown.get_column(col)[0] > 0:
-                    raise ValueError(
-                        "Columns to be encoded can not contain unknown value"
-                    )
+                    raise ValueError("Columns to be encoded can not contain unknown value")
 
         transformed_lazy: pl.LazyFrame = transformed.lazy()
 
@@ -77,9 +75,7 @@ class _GreedyTargetEncoder(BaseEncoder):
             col_value_is_missing: pl.Expr = pl.col(col) == _MISSING_VALUE
             col_value_is_unknown: pl.Expr = pl.col(col) == _UNKNOWN_VALUE
             replace_expr = (
-                pl.when(col_value_is_missing | col_value_is_unknown)
-                .then(self.global_mean)
-                .otherwise(pl.col(col))
+                pl.when(col_value_is_missing | col_value_is_unknown).then(self.global_mean).otherwise(pl.col(col))
             )
             transformed_lazy = transformed_lazy.with_columns(replace_expr.alias(col))
 
@@ -109,10 +105,7 @@ class _NoneSmoothingStrategy(BaseEstimator, TransformerMixin):
         X_lazy: pl.LazyFrame = X.lazy()
 
         for col in self.mappings.keys():
-            remapping = {
-                category: local_mean
-                for category, local_mean in self.mappings[col].rows()
-            }
+            remapping = {category: local_mean for category, local_mean in self.mappings[col].rows()}
             remapping[None] = _MISSING_VALUE
             expr = pl.col(col).replace_strict(
                 remapping,
@@ -124,7 +117,6 @@ class _NoneSmoothingStrategy(BaseEstimator, TransformerMixin):
 
 
 class _MEstimateStrategy(BaseEstimator, TransformerMixin):
-
     def __init__(self, m: float = 1.0):
         self.m = m
 
@@ -154,9 +146,7 @@ class _MEstimateStrategy(BaseEstimator, TransformerMixin):
 
         for col in self.mappings.keys():
             remapping = {
-                category: (
-                    (local_sum + self.m * self.global_mean) / (local_count + self.m)
-                )
+                category: ((local_sum + self.m * self.global_mean) / (local_count + self.m))
                 for category, local_count, local_sum in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
@@ -188,9 +178,7 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
                 .agg(
                     [
                         pl.col(y.name).mean().alias(f"{col}_mean"),
-                        (
-                            (pl.col(col).count().cast(pl.Float64) - self.k) / self.f
-                        ).alias(f"{col}_exp"),
+                        ((pl.col(col).count().cast(pl.Float64) - self.k) / self.f).alias(f"{col}_exp"),
                     ]
                 )
                 .with_columns(
@@ -206,10 +194,7 @@ class _EmpiricalBayesianStrategy(BaseEstimator, TransformerMixin):
 
         for col in self.mappings.keys():
             remapping = {
-                category: (
-                    smoothing_factor * local_mean
-                    + (1 - smoothing_factor) * self.global_mean
-                )
+                category: (smoothing_factor * local_mean + (1 - smoothing_factor) * self.global_mean)
                 for category, local_mean, smoothing_factor in self.mappings[col].rows()
             }
             remapping[None] = _MISSING_VALUE
