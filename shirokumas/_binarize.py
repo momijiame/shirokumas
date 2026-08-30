@@ -58,9 +58,7 @@ class OneHotEncoder(BaseEncoder):
                 mapping_unique_values = set(unique_values.to_list())
                 unknown_value = transform_unique_values - mapping_unique_values
                 if len(unknown_value) > 0:
-                    raise ValueError(
-                        "Columns to be encoded can not contain unknown value"
-                    )
+                    raise ValueError("Columns to be encoded can not contain unknown value")
 
             exprs = []
             for unique_value in unique_values:
@@ -151,17 +149,11 @@ class MultiLabelBinarizer(BaseEncoder):
                 mapping_unique_values = set(unique_values.to_list())
                 unknown_value = transform_unique_values - mapping_unique_values
                 if len(unknown_value) > 0:
-                    raise ValueError(
-                        "Columns to be encoded can not contain unknown value"
-                    )
+                    raise ValueError("Columns to be encoded can not contain unknown value")
 
             exprs = []
             for unique_value in unique_values:
-                expr = (
-                    pl.lit(unique_value)
-                    .is_in(pl.col(col))
-                    .alias(f"{col}_{unique_value}")
-                )
+                expr = pl.lit(unique_value).is_in(pl.col(col)).alias(f"{col}_{unique_value}")
                 exprs.append(expr)
             X_lazy = X_lazy.with_columns(exprs)
 

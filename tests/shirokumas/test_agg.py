@@ -232,9 +232,7 @@ class TestAggregateEncoder:
                 "category": ["A", "B", "A"],
             }
         )
-        encoder = AggregateEncoder(
-            cols=["fruits"], agg_exprs={"mean": pl.col("price").mean()}
-        )
+        encoder = AggregateEncoder(cols=["fruits"], agg_exprs={"mean": pl.col("price").mean()})
         encoder.fit(train_df)
         encoded_df = encoder.transform(train_df)
 
