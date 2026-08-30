@@ -40,8 +40,7 @@ dev = [
     "sphinx-autobuild",
 ]
 
-[tool.setuptools.dynamic]
-version = {attr = "shirokumas.__version__"}
+[tool.setuptools_scm]
 
 [tool.ruff]
 line-length = 120

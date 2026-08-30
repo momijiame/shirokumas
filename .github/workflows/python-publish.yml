@@ -23,6 +23,9 @@ jobs:
       # See: https://github.com/actions/checkout
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # setuptools-scm derives the version from the tags, so fetch them all
+          fetch-depth: 0
 
       # See: https://github.com/actions/setup-python
       - name: Setup Python ${{ matrix.python-version }}
