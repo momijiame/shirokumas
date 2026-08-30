@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: "0 12 * * 0"
 
+permissions:
+  contents: read
+
 jobs:
   test:
 
