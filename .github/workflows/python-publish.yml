@@ -13,6 +13,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Gated by a wait timer and restricted to v* tags; also the environment
+    # PyPI's trusted publisher is registered against.
+    environment: pypi
+
+    permissions:
+      # Mint the OIDC token that PyPI exchanges for a short-lived upload
+      # token. Without this the publish step has no credential at all.
+      id-token: write
+      contents: read
+
     strategy:
       matrix:
         python-version:
@@ -45,7 +55,8 @@ jobs:
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # v1.14.2
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          print_hash: true
+          # No user/password: the action detects the OIDC token and exchanges
+          # it with PyPI itself. PEP 740 attestations are on by default and
+          # only work over trusted publishing.
+          print-hash: true
 
