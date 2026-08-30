@@ -64,7 +64,7 @@ class AggregateEncoder(BaseEncoder):
             col_remappings: dict[str, dict[str | None, float | int]] = defaultdict(dict)
 
             for category, *agg_values in mapping.rows():
-                for agg_name, agg_value in zip(mapping.columns[1:], agg_values):
+                for agg_name, agg_value in zip(mapping.columns[1:], agg_values, strict=True):
                     col_remappings[agg_name][category] = agg_value
 
             for agg_name, replace_map in col_remappings.items():

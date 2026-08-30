@@ -59,7 +59,7 @@ class OrdinalEncoder(BaseEncoder):
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         if self.mappings is None:
-            warnings.warn("no mappings exists, nothing to do")
+            warnings.warn("no mappings exists, nothing to do", stacklevel=2)
             self.mappings = {}
 
         unknown_value = -1

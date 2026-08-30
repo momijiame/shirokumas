@@ -53,6 +53,7 @@ select = [
     "W",  # pycodestyle warnings
     "F",  # Pyflakes
     "I",  # isort
+    "B",  # flake8-bugbear
     "UP",  # pyupgrade
     "RUF",  # Ruff-specific rules
     "PIE",  # flake8-pie

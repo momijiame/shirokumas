@@ -43,7 +43,7 @@ class OutOfFoldEncodeWrapper(BaseEstimator, TransformerMixin):
         n_splits = len(self._split_indices)
         self.train_encoders = [clone(self.inner) for _ in range(n_splits)]
 
-        for encoder, (train_indices, _) in zip(self.train_encoders, self._split_indices):
+        for encoder, (train_indices, _) in zip(self.train_encoders, self._split_indices, strict=True):
             X_train, y_train = X[train_indices], y[train_indices]
             encoder.fit(X_train, y_train, **fit_params)
 
@@ -75,7 +75,7 @@ class OutOfFoldEncodeWrapper(BaseEstimator, TransformerMixin):
     def _transform_train(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
         transformed_dfs = []
         source_rows: list[int] = []
-        for encoder, (_, eval_indices) in zip(self.train_encoders, self._split_indices):
+        for encoder, (_, eval_indices) in zip(self.train_encoders, self._split_indices, strict=True):
             X_eval = X[eval_indices]
             transformed_df = encoder.transform(X_eval, **transform_params)
             transformed_dfs.append(transformed_df)
