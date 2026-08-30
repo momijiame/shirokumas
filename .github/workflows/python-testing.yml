@@ -56,10 +56,11 @@ jobs:
         run: |
           pylint shirokumas
 
-      - name: Run linter with flake8
+      - name: Run linter with ruff
         run: |
-          flake8 .
+          ruff check .
 
-      - name: Run linter with isort
-        uses: isort/isort-action@master
+      - name: Run formatter with ruff
+        run: |
+          ruff format --check --diff .
 
