@@ -53,6 +53,21 @@ select = [
     "W",  # pycodestyle warnings
     "F",  # Pyflakes
     "I",  # isort
+    "B",  # flake8-bugbear
+    "UP",  # pyupgrade
+    "RUF",  # Ruff-specific rules
+    "PIE",  # flake8-pie
+    "PERF",  # Perflint
+    "FURB",  # refurb
+    "LOG",  # flake8-logging
+    "G",  # flake8-logging-format
+    "T20",  # flake8-print
+    "FA",  # flake8-future-annotations
+    "YTT",  # flake8-2020
+    "INT",  # flake8-gettext
+    "SLOT",  # flake8-slots
+    "PLE",  # Pylint errors
+    "PLW",  # Pylint warnings
 ]
 
 [tool.ruff.lint.isort]
