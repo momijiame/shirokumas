@@ -39,7 +39,7 @@ class CountEncoder(BaseEncoder):
         self.mappings: dict[str, pl.DataFrame] = {}
 
     def _fit(self, X: pl.DataFrame, y: pl.Series | None = None, **fit_params):
-        cols = self.cols or X.columns
+        cols = self.cols_
         for col in cols:
             self.mappings[col] = X.group_by(col).len()
 

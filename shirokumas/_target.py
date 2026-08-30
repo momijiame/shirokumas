@@ -50,19 +50,16 @@ class _GreedyTargetEncoder(BaseEncoder):
         if y is None:
             raise ValueError("Need 'y' parameter")
 
-        self.cols = self.cols or X.columns
         self.global_mean = y.mean()
 
         # built here rather than in __init__ so that set_params() takes effect
         self.encoder = self._build_encoder()
 
-        X = X.select(self.cols)
+        X = X.select(self.cols_)
         return self.encoder.fit(X, y, **fit_params)
 
     def _transform(self, X: pl.DataFrame, **transform_params) -> pl.DataFrame:
-        cols = self.cols or X.columns
-
-        X = X.select(cols)
+        X = X.select(self.cols_)
 
         transformed = self.encoder.transform(X, **transform_params)
 
@@ -76,7 +73,7 @@ class _GreedyTargetEncoder(BaseEncoder):
 
         transformed_lazy: pl.LazyFrame = transformed.lazy()
 
-        for col in cols:
+        for col in self.cols_:
             col_value_is_missing: pl.Expr = pl.col(col) == _MISSING_VALUE
             col_value_is_unknown: pl.Expr = pl.col(col) == _UNKNOWN_VALUE
             replace_expr = (
