@@ -2,6 +2,8 @@ name: Testing Python Package
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   schedule:
     - cron: "0 12 * * 0"
