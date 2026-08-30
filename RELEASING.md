@@ -3,8 +3,10 @@
 Publishing a release to [PyPI](https://pypi.org/project/shirokumas/) means creating a
 GitHub Release. The `Upload Python Package` workflow takes it from there.
 
-This document is for maintainers. It needs push access to the repository and the
-`PYPI_API_TOKEN` repository secret.
+This document is for maintainers. It needs push access to the repository. There is no
+upload credential to hold: PyPI trusts the workflow itself, through a trusted publisher
+registered against this repository, `python-publish.yml`, and the `pypi` environment.
+The runner mints a short-lived token per run, so nothing long-lived exists to leak.
 
 ## Where the version comes from
 
@@ -75,13 +77,19 @@ it; the release has to actually be published.
 
 ### 5. Watch it land
 
+The job does not start immediately. The `pypi` environment holds it for a ten-minute
+wait timer, which exists so that a mistake noticed late can still be stopped — cancel
+the run from the Actions tab and nothing reaches PyPI.
+
 ```console
 $ gh run watch
 $ pip index versions shirokumas
 ```
 
 The workflow builds an sdist and a wheel with `python -m build` on Python 3.11 and
-uploads them with `pypa/gh-action-pypi-publish`.
+uploads them with `pypa/gh-action-pypi-publish`, which also attaches PEP 740
+attestations — provenance PyPI can verify, and something trusted publishing is a
+precondition for. The upload is recorded under the repository's Deployments tab.
 
 ## Things to know
 
@@ -89,6 +97,17 @@ uploads them with `pypa/gh-action-pypi-publish`.
 has. Tagging the wrong commit and publishing means `0.1.0` is spent for good, and the
 fix is to move on to `0.1.1` — deleting the release and the tag does not free the
 number. Hence step 3.
+
+**A failed publish does not spend the version number.** Only a successful upload
+reserves it. If the trusted publisher configuration and the workflow disagree, the run
+stops at authentication and PyPI never sees the release, so the fix is to correct the
+configuration and re-run the failed job — the tag and the version survive. This is a
+different situation from the one above, where the upload worked and the contents were
+wrong.
+
+**The `pypi` environment only accepts `v*` tags.** The workflow runs against the tag the
+release points at, and the environment refuses anything else. A release created from a
+branch, or from a tag named without the `v` prefix, will not publish.
 
 **Both workflows check out with `fetch-depth: 0`.** The default shallow clone carries no
 tags, which would leave every build claiming to be a development version. Do not drop
